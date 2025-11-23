@@ -1,3 +1,4 @@
+![PyTorch](https://img.shields.io/badge/PyTorch-EE4C2C?logo=pytorch&logoColor=white)
 # NEURAL NETWORKS - DEEP LEARNING: UNIVERSITY PROJECTS
 
 The current repository contains various projects built as part of the university course **"Neural Networks - Deep Learning"**
