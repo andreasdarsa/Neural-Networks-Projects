@@ -112,13 +112,13 @@ test_loader = DataLoader(test_data, batch_size=32, shuffle=False)
 
 # 4. Hyperparameter Tuning and Model Training
 # 4.1 Testing different learning rates
-lr_list = [0.2, 0.05, 0.02, 0.01, 0.005, 0.001, 0.0005, 0.0002]
+lr_list = [0.01, 0.005, 0.001, 0.0005]
 best_lr = LR
 best_acc = 0.0
 for lr in lr_list:
     print(f'\n ------ Training with learning rate: {lr} ------ ')
     model = MLP(in_dim=X_train.shape[1], hidden=HIDDEN_SIZE, num_layers=NUM_LAYERS)
-    train_model(model, train_loader, val_loader, lr=LR, num_epochs=NUM_EPOCHS)
+    train_model(model, train_loader, val_loader, lr=lr, num_epochs=NUM_EPOCHS)
     test_acc = evaluate(model, test_loader)
     if test_acc > best_acc:
         best_acc = test_acc
@@ -132,7 +132,7 @@ best_acc = 0.0
 for hidden_size in hidden_sizes:
     print(f'\n ------ Training with hidden size: {hidden_size} ------ ')
     model = MLP(in_dim=X_train.shape[1], hidden=hidden_size, num_layers=NUM_LAYERS)
-    train_model(model, train_loader, val_loader, lr=LR, num_epochs=NUM_EPOCHS)
+    train_model(model, train_loader, val_loader, lr=best_lr, num_epochs=NUM_EPOCHS)
     test_acc = evaluate(model, test_loader)
     if test_acc > best_acc:
         best_acc = test_acc
@@ -145,8 +145,8 @@ best_num_layers = NUM_LAYERS
 best_acc = 0.0
 for num_layers in num_layers_list:
     print(f'\n ------ Training with number of layers: {num_layers} ------ ')
-    model = MLP(in_dim=X_train.shape[1], hidden=HIDDEN_SIZE, num_layers=num_layers)
-    train_model(model, train_loader, val_loader, lr=LR, num_epochs=NUM_EPOCHS)
+    model = MLP(in_dim=X_train.shape[1], hidden=best_hidden_size, num_layers=num_layers)
+    train_model(model, train_loader, val_loader, lr=best_lr, num_epochs=NUM_EPOCHS)
     test_acc = evaluate(model, test_loader)
     print(f'Test Accuracy: {test_acc:.4f}')
 
@@ -156,8 +156,8 @@ best_num_epochs = NUM_EPOCHS
 best_acc = 0.0
 for num_epochs in epoch_list:
     print(f'\n ------ Training with number of epochs: {num_epochs} ------ ')
-    model = MLP(in_dim=X_train.shape[1], hidden=HIDDEN_SIZE, num_layers=NUM_LAYERS)
-    train_model(model, train_loader, val_loader, lr=LR, num_epochs=num_epochs)
+    model = MLP(in_dim=X_train.shape[1], hidden=best_hidden_size, num_layers=best_num_layers)
+    train_model(model, train_loader, val_loader, lr=best_lr, num_epochs=num_epochs)
     test_acc = evaluate(model, test_loader)
     if test_acc > best_acc:
         best_acc = test_acc
@@ -172,3 +172,40 @@ final_model = MLP(in_dim=X_train.shape[1], hidden=best_hidden_size, num_layers=b
 train_model(final_model, train_loader, val_loader, lr=best_lr, num_epochs=best_num_epochs)
 final_test_acc = evaluate(final_model, test_loader)
 print(f'Final Test Accuracy with Best Hyperparameters: {final_test_acc:.4f}')
+
+#6. Random choice from the evaluation set, show example of correct and false predictions
+# 3 unique samples from the validation set
+# choose 3 random validation samples with a controllable seed
+seed = 42
+rng = np.random.default_rng(seed) if seed is not None else np.random.default_rng()
+idxs = rng.choice(len(val_data), size=3, replace=False)
+
+inputs = torch.stack([val_data[i][0] for i in idxs])
+labels = torch.tensor([int(val_data[i][1]) for i in idxs], dtype=torch.long)
+
+outputs = final_model(inputs)
+_, predicted = torch.max(outputs.data, 1)
+for i in range(3):
+    print(f'Sample {i+1}:')
+    # Recover original (unscaled) feature values and print categorical names
+    cols = X.columns.tolist()
+    orig_row = scaler.inverse_transform(inputs[i].numpy().reshape(1, -1))[0]
+
+    # Load raw CSV to get original category order
+    df_raw = pd.read_csv('transformed_matches.csv')
+
+    for cat_col in ['home_team', 'away_team']:
+        if cat_col in cols:
+            idx = cols.index(cat_col)
+            code = int(round(orig_row[idx]))
+            categories = pd.Categorical(df_raw[cat_col]).categories
+            cat_value = categories[code] if 0 <= code < len(categories) else f'code_{code}'
+            print(f'{cat_col}: code={code} -> {cat_value}')
+
+    # Print other (unscaled) feature values for the sample
+    other_features = {cols[j]: float(orig_row[j]) for j in range(len(cols)) if cols[j] not in ['home_team', 'away_team']}
+    print('Other features (unscaled):', other_features)
+
+    print(f'True Label: {labels[i].item()}, Predicted Label: {predicted[i].item()}')
+    print('Correct Prediction' if labels[i].item() == predicted[i].item() else 'Incorrect Prediction')
+    print('---')
