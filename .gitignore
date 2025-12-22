@@ -3,3 +3,6 @@
 
 # Ignore virtual environment directories
 nn_venv/
+
+# Ignore dataset directories
+data/UCI HAR Dataset/
