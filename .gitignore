@@ -2,7 +2,11 @@
 **/__pycache__/
 
 # Ignore virtual environment directories
-nn_venv/
+venv/
 
 # Ignore dataset directories
 data/UCI HAR Dataset/
+
+# Ignore images & produced data files
+autoencoder/img/
+autoencoder/produced_data/
