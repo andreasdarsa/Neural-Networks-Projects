@@ -142,7 +142,7 @@ for dim, mse in pca_mse_results.items():
 print("Experiments completed.")
 
 # 7. Visualization
-# Original vs AutoEncoder vs PCA for a few samples
+# Input vs Actual vs Predicted for a few samples
 # Loss curves for training and validation
 # Good/bad reconstructions
 num_samples = 5
@@ -150,12 +150,12 @@ fig, axes = plt.subplots(num_samples, 3, figsize=(9, 8))
 for i in range(num_samples):
     # Original
     axes[i, 0].imshow(X_test[i].reshape(8, 8), cmap='gray')
-    axes[i, 0].set_title('Original')
+    axes[i, 0].set_title('Input')
     axes[i, 0].axis('off')
     
     # Autoencoder Reconstruction
     axes[i, 1].imshow(y_test[i].reshape(8, 8), cmap='gray')
-    axes[i, 1].set_title('Original')
+    axes[i, 1].set_title('Actual')
     axes[i, 1].axis('off')
     
     # PCA Reconstruction
