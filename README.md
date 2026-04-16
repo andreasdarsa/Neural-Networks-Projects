@@ -9,8 +9,16 @@ The current repository contains various projects built as part of the university
 The intermediate project is about training and testing the following classifiyng algorithms:
 - K Nearest Neighbours (K = 1 & K = 3) Classifier
 - Nearest Centroid Classifier
+
 based on **Premier League match data from the 2020-2021 season until the 2024-2025 season** and trying to predict match outcomes (home win, draw, away win).
-The models are compared on their accuracy, precision and recall.
+The models are compared on their accuracy.
+
+Final model performance
+|Metric|Accuracy|
+|--|--|
+|1-NN|40.53%|
+|3-NN|48.68%|
+|NC|44.74%|
 
 ## 1st project
 The first project is about training and testing an **MLP FeedForward Neural Network** on the same data mentioned above.
@@ -19,4 +27,18 @@ Before training and testing it, we test **different hyperparameter values** in o
 - Hidden neurons
 - Hidden layers
 - Learning rate
+
 Eventually, we are going to compare the network's accuracy with the accuracy achieved by K-NN and NC.
+
+Network architecture:
+- 10 input neurons
+- 3 output neurons
+- **ReLU** hidden layers
+- Cross Entropy Loss & Adam Optimizer for adaptive learning rate
+
+Hyperparameters selected after grid search
+- 2 layers of 32 neurons
+- 15 epochs with lr=0.0005
+- Maximum accuracy: **70.53%**
+
+As we can see, an NLP with more complex architecture can recognize complex, non-linear relations better than distance-based models.
